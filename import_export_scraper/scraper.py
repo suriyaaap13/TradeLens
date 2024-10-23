@@ -16,7 +16,6 @@ class TradeDataScraper:
         chrome_options.add_argument("--headless")  # Run in headless mode
         chrome_options.add_argument("--no-sandbox")  # Bypass OS security model
         chrome_options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource problems
-        chrome_options.use_chromium = True
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
     def get_trade_data(self, hsn_code, year_range):
