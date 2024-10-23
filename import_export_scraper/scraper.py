@@ -16,7 +16,7 @@ class TradeDataScraper:
         chrome_options.use_chromium = True
         self.driver = webdriver.Edge(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
-    def get_trade_qty(self, hsn_code, year_range):
+    def get_trade_data(self, hsn_code, year_range):
         """
         Scrape both import and export data and merge the results into a single DataFrame.
         """
@@ -42,6 +42,7 @@ class TradeDataScraper:
             import_data_usd = self.get_import_value_USD(hsn_code, year_range)
             export_data_usd = self.get_export_value_USD(hsn_code, year_range)
             combined_data = pd.merge(import_data_usd, export_data_usd, on=['Year', 'HS_Code'], how='outer')
+            combined_data.fillna(0, inplace=True)  # Fill missing values with 0
             return combined_data
 
 
@@ -76,7 +77,6 @@ class TradeDataScraper:
             # Submit
             submit_btn = self.driver.find_element(By.ID, 'button1')
             submit_btn.click()
-            time.sleep(1)
 
             # Scrape the table data
             table_data = self.driver.find_elements(By.TAG_NAME, 'td')
@@ -84,16 +84,23 @@ class TradeDataScraper:
 
             qty_text = 0
             hs_code = code
-            year_text = year
+            y1 = int(year) - 1
+            y2 = year
+            year_text = str(y1)+'-'+str(y2)
+            qty_text = 0
 
-            if len(table_header) > 4:
+            if table_header:
                 arr_th = [th.text for th in table_header]
                 year_text = arr_th[4]
 
-            if len(table_data) > 4:
+            if table_data:
                 arr_td = [td.text for td in table_data]
                 qty_text = arr_td[4].replace(',', '') if arr_td[4] != ' ' else 0
 
+            if qty_text == '' or qty_text == ' ':
+                qty_text = '0'
+
+            
             # Add the row to the data list
             row = [year_text, hs_code, float(qty_text)]
             data.append(row)
@@ -141,15 +148,23 @@ class TradeDataScraper:
 
             qty_text = 0
             hs_code = code
-            year_text = year
+            y1 = int(year) - 1
+            y2 = year
+            year_text = str(y1)+'-'+str(y2)
+            qty_text = 0
+            
 
-            if len(table_header) > 4:
+            if table_header:
                 arr_th = [th.text for th in table_header]
                 year_text = arr_th[4]
 
-            if len(table_data) > 4:
+            if table_data:
                 arr_td = [td.text for td in table_data]
                 qty_text = arr_td[4].replace(',', '') if arr_td[4] != ' ' else 0
+
+
+            if qty_text == '' or qty_text == ' ':
+                qty_text = '0'
 
             # Add the row to the data list
             row = [year_text, hs_code, float(qty_text)]
@@ -195,20 +210,28 @@ class TradeDataScraper:
             # Pressing Submit Button
             submit_btn = self.driver.find_element(By.ID, 'button1')
             submit_btn.click()
-            time.sleep(1)
-            header = self.driver.find_elements(By.TAG_NAME, 'th')
+            
             table_data = self.driver.find_elements(By.TAG_NAME, 'td')
+            header = self.driver.find_elements(By.TAG_NAME, 'th')
             
             arr_hd = [i for i in header]
             arr_td = [i for i in table_data]
+
+            y1 = int(j)-1
+            y2 = j
+            year_text = str(y1)+'-'+str(y2)
+            value_text = '0'
             
             if arr_td:
-                qty_text = arr_td[3].text.replace(',','')
-            
+                value_text = arr_td[3].text.replace(',','').strip()
+                
             if arr_hd:
                 year_text = arr_hd[3].text
+
+            if value_text == '' or value_text == ' ':
+                value_text = '0'
             
-            row = [year_text, code, float(qty_text)]
+            row = [year_text, code, float(value_text)]
             data.append(row)
             
             # Back Button
@@ -258,14 +281,22 @@ class TradeDataScraper:
                 
                 arr_hd = [i for i in header]
                 arr_td = [i for i in table_data]
+
+                y1 = int(j)-1
+                y2 = j
+                year_text = str(y1)+'-'+str(y2)
+                value_text = 0
                 
                 if arr_td:
-                    qty_text = arr_td[3].text.replace(',','')
+                    value_text = arr_td[3].text.replace(',','').strip()
                 
                 if arr_hd:
                     year_text = arr_hd[3].text
+
+                if value_text == '' or value_text == ' ':
+                    value_text = '0'
                 
-                row = [year_text, code, float(qty_text)]
+                row = [year_text, code, float(value_text)]
                 data.append(row)
                 
                 # Back Button
@@ -274,11 +305,6 @@ class TradeDataScraper:
 
             # Convert the array into a Dataframe
             return pd.DataFrame(data, columns=['Year', 'HS_Code', 'Import_$_millions'])
-
-    
-    
-    
-    
     
     def close(self):
         # Close the scraper and the database connection

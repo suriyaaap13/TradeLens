@@ -33,7 +33,7 @@ if st.sidebar.button("Fetch Data"):
             years = [str(i) for i in range(int(from_year), int(to_year) + 1)]
 
             # Run scraping function
-            data = scraper.get_trade_qty(hs_code_input, years)
+            data = scraper.get_trade_data(hs_code_input, years)
 
             # Cleanup
             scraper.close()
