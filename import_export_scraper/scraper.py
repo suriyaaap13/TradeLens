@@ -14,7 +14,7 @@ class TradeDataScraper:
         self.url_export = 'https://tradestat.commerce.gov.in/eidb/ecomq.asp'
         chrome_options = Options()
         chrome_options.use_chromium = True
-        self.driver = webdriver.Edge(service=Service(ChromeDriverManager().install()), options=chrome_options)
+        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
     def get_trade_data(self, hsn_code, year_range):
         """
