@@ -2,12 +2,11 @@ import streamlit as st
 from import_export_scraper import TradeDataScraper
 
 st.title("TradeLens")
-st.caption("An Indian trade database")
+st.caption("An Indian trade data Scrapping tool")
 
 # Instructions for users
 st.markdown("""
-    **Instructions:**
-    *********************
+    Instructions: 
 """)
 
 # Input from user
@@ -36,7 +35,7 @@ if st.button("Fetch Data"):
         if not data.empty:
             st.dataframe(data)
         else:
-            st.warning("No import data found for the provided HS Code.")
+            st.warning("No data found for the provided HS Code.")
 
 
         # Cleanup
