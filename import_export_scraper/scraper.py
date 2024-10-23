@@ -13,6 +13,9 @@ class TradeDataScraper:
         self.url_import = 'https://tradestat.commerce.gov.in/eidb/icomq.asp'
         self.url_export = 'https://tradestat.commerce.gov.in/eidb/ecomq.asp'
         chrome_options = Options()
+        chrome_options.add_argument("--headless")  # Run in headless mode
+        chrome_options.add_argument("--no-sandbox")  # Bypass OS security model
+        chrome_options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource problems
         chrome_options.use_chromium = True
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
