@@ -20,22 +20,29 @@ class TradeDataScraper:
         """
         Scrape both import and export data and merge the results into a single DataFrame.
         """
-        import_data_qty = self.get_import_qty(hsn_code, year_range)
-        export_data_qty = self.get_export_qty(hsn_code, year_range)
-        import_data_usd = self.get_import_value_USD(hsn_code, year_range)
-        export_data_usd = self.get_export_value_USD(hsn_code, year_range)
         
-
-        # Merge import and export data on 'Year' and 'HS_Code'
-        combined_data = pd.merge(import_data_qty, export_data_qty, on=['Year', 'HS_Code'], how='outer')
-        combined_data = pd.merge(combined_data, import_data_usd, on=['Year', 'HS_Code'], how='outer')
-        combined_data = pd.merge(combined_data, export_data_usd, on=['Year', 'HS_Code'], how='outer')
         
-        combined_data.fillna(0, inplace=True)  # Fill missing values with 0
+        if len(hsn_code) > 4:
+            
+            import_data_qty = self.get_import_qty(hsn_code, year_range)
+            export_data_qty = self.get_export_qty(hsn_code, year_range)
+            import_data_usd = self.get_import_value_USD(hsn_code, year_range)
+            export_data_usd = self.get_export_value_USD(hsn_code, year_range)
 
+
+            # Merge import and export data on 'Year' and 'HS_Code'
+            combined_data = pd.merge(import_data_qty, export_data_qty, on=['Year', 'HS_Code'], how='outer')
+            combined_data = pd.merge(combined_data, import_data_usd, on=['Year', 'HS_Code'], how='outer')
+            combined_data = pd.merge(combined_data, export_data_usd, on=['Year', 'HS_Code'], how='outer')
+            combined_data.fillna(0, inplace=True)  # Fill missing values with 0
+            return combined_data
         
+        else:
 
-        return combined_data
+            import_data_usd = self.get_import_value_USD(hsn_code, year_range)
+            export_data_usd = self.get_export_value_USD(hsn_code, year_range)
+            combined_data = pd.merge(import_data_usd, export_data_usd, on=['Year', 'HS_Code'], how='outer')
+            return combined_data
 
 
 
@@ -180,34 +187,33 @@ class TradeDataScraper:
             # Select hsn_code digit
             dropdown.select_by_value(str(len(code)))
             
-            # Quantity is available for 6 & 8 digit HSN code
-            if len(code) > 4:
-                # Pressing USD Radio button
-                usd_btn = self.driver.find_element(By.ID, 'radiousd')
-                usd_btn.click()
+            
+            # Pressing USD Radio button
+            usd_btn = self.driver.find_element(By.ID, 'radiousd')
+            usd_btn.click()
 
-                # Pressing Submit Button
-                submit_btn = self.driver.find_element(By.ID, 'button1')
-                submit_btn.click()
-                time.sleep(1)
-                header = self.driver.find_elements(By.TAG_NAME, 'th')
-                table_data = self.driver.find_elements(By.TAG_NAME, 'td')
-                
-                arr_hd = [i for i in header]
-                arr_td = [i for i in table_data]
-                
-                if arr_td:
-                    qty_text = arr_td[3].text.replace(',','')
-                
-                if arr_hd:
-                    year_text = arr_hd[3].text
-                
-                row = [year_text, code, float(qty_text)]
-                data.append(row)
-                
-                # Back Button
-                back_btn = self.driver.find_element(By.ID, 'IMG1')
-                back_btn.click()
+            # Pressing Submit Button
+            submit_btn = self.driver.find_element(By.ID, 'button1')
+            submit_btn.click()
+            time.sleep(1)
+            header = self.driver.find_elements(By.TAG_NAME, 'th')
+            table_data = self.driver.find_elements(By.TAG_NAME, 'td')
+            
+            arr_hd = [i for i in header]
+            arr_td = [i for i in table_data]
+            
+            if arr_td:
+                qty_text = arr_td[3].text.replace(',','')
+            
+            if arr_hd:
+                year_text = arr_hd[3].text
+            
+            row = [year_text, code, float(qty_text)]
+            data.append(row)
+            
+            # Back Button
+            back_btn = self.driver.find_element(By.ID, 'IMG1')
+            back_btn.click()
 
         # Convert the array into a Dataframe
         return pd.DataFrame(data, columns=['Year', 'HS_Code', 'Export_$_millions'])
@@ -238,34 +244,33 @@ class TradeDataScraper:
                 # Select hsn_code digit
                 dropdown.select_by_value(str(len(code)))
                 
-                # Quantity is available for 6 & 8 digit HSN code
-                if len(code) > 4:
-                    # Pressing USD Radio button
-                    usd_btn = self.driver.find_element(By.ID, 'radiousd')
-                    usd_btn.click()
+                
+                # Pressing USD Radio button
+                usd_btn = self.driver.find_element(By.ID, 'radiousd')
+                usd_btn.click()
 
-                    # Pressing Submit Button
-                    submit_btn = self.driver.find_element(By.ID, 'button1')
-                    submit_btn.click()
-                    time.sleep(1)
-                    header = self.driver.find_elements(By.TAG_NAME, 'th')
-                    table_data = self.driver.find_elements(By.TAG_NAME, 'td')
-                    
-                    arr_hd = [i for i in header]
-                    arr_td = [i for i in table_data]
-                    
-                    if arr_td:
-                        qty_text = arr_td[3].text.replace(',','')
-                    
-                    if arr_hd:
-                        year_text = arr_hd[3].text
-                    
-                    row = [year_text, code, float(qty_text)]
-                    data.append(row)
-                    
-                    # Back Button
-                    back_btn = self.driver.find_element(By.ID, 'IMG1')
-                    back_btn.click()
+                # Pressing Submit Button
+                submit_btn = self.driver.find_element(By.ID, 'button1')
+                submit_btn.click()
+                time.sleep(1)
+                header = self.driver.find_elements(By.TAG_NAME, 'th')
+                table_data = self.driver.find_elements(By.TAG_NAME, 'td')
+                
+                arr_hd = [i for i in header]
+                arr_td = [i for i in table_data]
+                
+                if arr_td:
+                    qty_text = arr_td[3].text.replace(',','')
+                
+                if arr_hd:
+                    year_text = arr_hd[3].text
+                
+                row = [year_text, code, float(qty_text)]
+                data.append(row)
+                
+                # Back Button
+                back_btn = self.driver.find_element(By.ID, 'IMG1')
+                back_btn.click()
 
             # Convert the array into a Dataframe
             return pd.DataFrame(data, columns=['Year', 'HS_Code', 'Import_$_millions'])
